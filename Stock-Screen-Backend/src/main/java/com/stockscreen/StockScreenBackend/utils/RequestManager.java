@@ -1,6 +1,8 @@
 package com.stockscreen.StockScreenBackend.utils;
 
 
+import java.net.URI;
+
 import org.springframework.http.HttpEntity;
 
 import org.springframework.util.LinkedMultiValueMap;
@@ -37,6 +39,10 @@ public class RequestManager {
 
     public static String getSymbolCandleStick_TWELVE(String symbol,String interval, int outputSize){
         return String.format("https://twelve-data1.p.rapidapi.com/time_series?symbol=%s&interval=%s&outputsize=%s&format=json",symbol,interval,outputSize);
+    }
+
+    public static String searchStocks_TWELVE(String symbol) {
+        return String.format("https://twelve-data1.p.rapidapi.com/symbol_search?symbol=%s&outputsize=5",symbol);
     }
 
 }

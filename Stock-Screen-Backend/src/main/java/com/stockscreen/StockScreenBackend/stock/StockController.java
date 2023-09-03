@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stockscreen.StockScreenBackend.chart.Chart;
@@ -44,9 +46,17 @@ public class StockController {
         return service.filterStocks(service.getAllStocks());
     }
 
-    @GetMapping("/querystock")
-    public Chart getQueryStock(){
+    @GetMapping("/searchstocks")
+    public List<Stock> searchStocks(@RequestParam String symbol){
+        System.out.println(symbol);
+        return service.searchStocks(symbol);
 
-        return service.queryStock("AAPL");
     }
+
+    @GetMapping("/querystock/{symbol}")
+    public Chart getQueryStock(@PathVariable String symbol){
+
+        return service.queryStock(symbol);
+    }
+
 }

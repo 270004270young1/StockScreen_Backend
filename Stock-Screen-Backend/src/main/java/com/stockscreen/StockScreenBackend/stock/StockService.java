@@ -95,7 +95,7 @@ public class StockService {
     public Chart queryStock(String symbol){
 
         HttpEntity<String> httpEntity = RequestManager.getTwelveAPIHeader(env.getProperty("RAPIDAPI_KEY"));
-        ResponseEntity<String> rs = restTemplate.exchange(RequestManager.getSymbolCandleStick_TWELVE(symbol, "1day", 10),HttpMethod.GET,httpEntity,String.class);
+        ResponseEntity<String> rs = restTemplate.exchange(RequestManager.getSymbolCandleStick_TWELVE(symbol, "1day", 180),HttpMethod.GET,httpEntity,String.class);
 
         try {
             JsonNode node = mapper.readTree(rs.getBody());
@@ -107,6 +107,24 @@ public class StockService {
         }
         return null;
     }
+
+
+    public List<Stock> searchStocks(String symbol) {
+        
+        HttpEntity<String> httpEntity = RequestManager.getTwelveAPIHeader(env.getProperty("RAPIDAPI_KEY"));
+        ResponseEntity<String> rs = restTemplate.exchange(RequestManager.searchStocks_TWELVE(symbol),HttpMethod.GET,httpEntity,String.class);
+
+        try {
+            JsonNode node = mapper.readTree(rs.getBody());
+            List<Stock> stocks = mapper.readValue(node.get("data").toString(),new TypeReference<List<Stock>>(){});
+            return stocks;
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
 
 
 
