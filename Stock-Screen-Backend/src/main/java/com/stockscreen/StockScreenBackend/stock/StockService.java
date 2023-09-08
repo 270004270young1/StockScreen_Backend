@@ -4,13 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stockscreen.StockScreenBackend.TooManyRequestException;
 import com.stockscreen.StockScreenBackend.chart.CandleValue;
 import com.stockscreen.StockScreenBackend.chart.Chart;
 import com.stockscreen.StockScreenBackend.utils.RequestManager;
@@ -92,22 +96,25 @@ public class StockService {
         return filteredStocks;
     }
 
-    public Chart queryStock(String symbol){
+    public Chart queryStock(String symbol) throws Exception{
 
         HttpEntity<String> httpEntity = RequestManager.getTwelveAPIHeader(env.getProperty("RAPIDAPI_KEY"));
         ResponseEntity<String> rs = restTemplate.exchange(RequestManager.getSymbolCandleStick_TWELVE(symbol, "1day", 180),HttpMethod.GET,httpEntity,String.class);
 
         try {
-
+                       
             JsonNode node = mapper.readTree(rs.getBody());
+            
+            System.out.println("Still running");
+            if(node.get("values")==null)
+                throw new Exception("Stock not available. Please try other stocks.");
             List<CandleValue> candleValues = mapper.readValue(node.get("values").toString(),new TypeReference<List<CandleValue>>(){});
             return new Chart(candleValues);
         } catch (Exception e) {
-            // TODO: handle exception
             System.out.println(e.getMessage());
-            throw new Error(e.getMessage());
-
+            throw e;
         }
+       
         
     }
 
@@ -124,6 +131,7 @@ public class StockService {
         } catch (Exception e) {
             // TODO: handle exception
             System.out.println(e.getMessage());
+            
            
         }
         return null;
