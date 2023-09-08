@@ -76,7 +76,7 @@ public class StockService {
                 ResponseEntity<String> rs = restTemplate.exchange(String.format("https://yahoo-finance15.p.rapidapi.com/api/yahoo/qu/quote/%s",stockToSend),HttpMethod.GET,httpEntity,String.class);
     
                 List<Stock> tempStocks = mapper.readValue(rs.getBody(),new TypeReference<List<Stock>>(){});
-                System.out.println(tempStocks.size());
+                
                 // for(int j=0;j<tempStocks.size();j++){
                 //     filteredStocks.add(tempStocks.get((j)));
                 // }
@@ -98,14 +98,17 @@ public class StockService {
         ResponseEntity<String> rs = restTemplate.exchange(RequestManager.getSymbolCandleStick_TWELVE(symbol, "1day", 180),HttpMethod.GET,httpEntity,String.class);
 
         try {
+
             JsonNode node = mapper.readTree(rs.getBody());
             List<CandleValue> candleValues = mapper.readValue(node.get("values").toString(),new TypeReference<List<CandleValue>>(){});
             return new Chart(candleValues);
         } catch (Exception e) {
             // TODO: handle exception
             System.out.println(e.getMessage());
+            throw new Error(e.getMessage());
+
         }
-        return null;
+        
     }
 
 
@@ -121,6 +124,7 @@ public class StockService {
         } catch (Exception e) {
             // TODO: handle exception
             System.out.println(e.getMessage());
+           
         }
         return null;
     }
