@@ -51,12 +51,12 @@ public class StockController {
     }
 
     @GetMapping("/searchstocks") 
-    public List<Stock> searchStocks(@RequestParam String symbol) throws TooManyRequestException{
+    public List<Stock> searchStocks(@RequestParam String symbol){
         try {
             
             return service.searchStocks(symbol);
         }catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Too many requests. Please try again later.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
         }
 
     }

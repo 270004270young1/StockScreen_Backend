@@ -96,45 +96,48 @@ public class StockService {
         return filteredStocks;
     }
 
-    public Chart queryStock(String symbol) throws Exception{
+    public Chart queryStock(String symbol) throws TooManyRequestException,StockNotAvailableException{
 
         HttpEntity<String> httpEntity = RequestManager.getTwelveAPIHeader(env.getProperty("RAPIDAPI_KEY"));
+        try {
         ResponseEntity<String> rs = restTemplate.exchange(RequestManager.getSymbolCandleStick_TWELVE(symbol, "1day", 180),HttpMethod.GET,httpEntity,String.class);
 
-        try {
                        
             JsonNode node = mapper.readTree(rs.getBody());
             
-            System.out.println("Still running");
+            //System.out.println("Still running");
             if(node.get("values")==null)
-                throw new Exception("Stock not available. Please try other stocks.");
+                throw new StockNotAvailableException();
             List<CandleValue> candleValues = mapper.readValue(node.get("values").toString(),new TypeReference<List<CandleValue>>(){});
             return new Chart(candleValues);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        }
+        catch(StockNotAvailableException e){
             throw e;
+        }
+        catch (Exception e) {
+            //System.out.println(e.getMessage());
+            throw new TooManyRequestException();
         }
        
         
     }
 
 
-    public List<Stock> searchStocks(String symbol) {
+    public List<Stock> searchStocks(String symbol) throws TooManyRequestException{
         
         HttpEntity<String> httpEntity = RequestManager.getTwelveAPIHeader(env.getProperty("RAPIDAPI_KEY"));
+        try {
         ResponseEntity<String> rs = restTemplate.exchange(RequestManager.searchStocks_TWELVE(symbol),HttpMethod.GET,httpEntity,String.class);
 
-        try {
             JsonNode node = mapper.readTree(rs.getBody());
             List<Stock> stocks = mapper.readValue(node.get("data").toString(),new TypeReference<List<Stock>>(){});
             return stocks;
         } catch (Exception e) {
             // TODO: handle exception
-            System.out.println(e.getMessage());
-            
+            //System.out.println(e.getMessage());
+            throw new TooManyRequestException();
            
         }
-        return null;
     }
 
 
